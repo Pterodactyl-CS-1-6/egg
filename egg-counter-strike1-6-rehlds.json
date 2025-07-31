@@ -1,0 +1,184 @@
+{
+    "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+    "meta": {
+        "version": "PTDL_v2",
+        "update_url": "https:\/\/pterodactyleggs.com\/egg\/679e55e22d54e24a498434e5\/download"
+    },
+    "exported_at": "2025-07-31T15:10:59+03:00",
+    "name": "Counter Strike 1.6 - ReHLDS",
+    "author": "contact@nelvach.xyz",
+    "description": "\u0414\u0430\u043d\u043d\u043e\u0435 \u044f\u0439\u0446\u043e \u043f\u0440\u0435\u0434\u043d\u0430\u0437\u043d\u0430\u0447\u0435\u043d\u043e \u0434\u043b\u044f \u0440\u0430\u0437\u0432\u0435\u0440\u0442\u044b\u0432\u0430\u043d\u0438\u044f Counter-Strike 1.6 \u0441\u0435\u0440\u0432\u0435\u0440\u0430 \u0441 \u0438\u0441\u043f\u043e\u043b\u044c\u0437\u043e\u0432\u0430\u043d\u0438\u0435\u043c ReHLDS \u0438 \u0441\u0432\u044f\u0437\u0430\u043d\u043d\u044b\u0445 \u043c\u043e\u0434\u0443\u043b\u0435\u0439 \u0447\u0435\u0440\u0435\u0437 \u0430\u0432\u0442\u043e\u043c\u0430\u0442\u0438\u0447\u0435\u0441\u043a\u0443\u044e \u0443\u0441\u0442\u0430\u043d\u043e\u0432\u043a\u0443 \u0438\u0437 GitHub. \u041e\u043d\u043e \u043f\u0440\u0435\u0434\u043b\u0430\u0433\u0430\u0435\u0442 \u0443\u0434\u043e\u0431\u043d\u044b\u0439 \u0441\u043f\u043e\u0441\u043e\u0431 \u0440\u0430\u0437\u0432\u0435\u0440\u0442\u044b\u0432\u0430\u043d\u0438\u044f \u0438 \u043d\u0430\u0441\u0442\u0440\u043e\u0439\u043a\u0438 \u0441\u0435\u0440\u0432\u0435\u0440\u0430 \u0441 \u0440\u0430\u0441\u0448\u0438\u0440\u0435\u043d\u043d\u043e\u0439 \u043c\u043e\u0434\u0443\u043b\u044c\u043d\u043e\u0439 \u0430\u0440\u0445\u0438\u0442\u0435\u043a\u0442\u0443\u0440\u043e\u0439.",
+    "features": [
+        "steam_disk_space"
+    ],
+    "docker_images": {
+        "ghcr.io\/pterodactyl\/games:source": "ghcr.io\/pterodactyl\/games:source"
+    },
+    "file_denylist": [],
+    "startup": ".\/hlds_run -console -game {{HLDS_GAME}} -port {{SERVER_PORT}} -sport {{VAC_PORT}} +map {{SRCDS_MAP}} +ip 0.0.0.0 -strictportbind -norestart +maxplayers 32 +pingboost 2 +sys_ticrate 1200",
+    "config": {
+        "files": "{\r\n    \"cstrike\/server.cfg\": {\r\n        \"parser\": \"file\",\r\n        \"find\": {\r\n            \"sv_downloadurl\": \"sv_downloadurl \\\"http:\/\/{{env.P_SERVER_LOCATION}}\/{{env.P_SERVER_UUID}}\/cstrike\\\"\",\r\n            \"sv_allowdownload\": \"sv_allowdownload \\\"1\\\"\",\r\n            \"sv_allowupload\": \"sv_allowupload \\\"0\\\"\"\r\n        }\r\n    }\r\n}",
+        "startup": "{\r\n    \"done\": \"Connection to Steam servers successful\"\r\n}",
+        "logs": "{}",
+        "stop": "quit"
+    },
+    "scripts": {
+        "installation": {
+            "script": "#!\/bin\/bash\r\nset -e\r\n\r\n# \u041f\u0435\u0440\u0435\u043c\u0435\u043d\u043d\u044b\u0435 \u043e\u043a\u0440\u0443\u0436\u0435\u043d\u0438\u044f \u0438 \u0438\u0445 \u0437\u043d\u0430\u0447\u0435\u043d\u0438\u044f \u043f\u043e \u0443\u043c\u043e\u043b\u0447\u0430\u043d\u0438\u044e\r\nREHLDS_VERSION=\"${REHLDS_VERSION:-latest}\"\r\nREGAMEDLL_VERSION=\"${REGAMEDLL_VERSION:-latest}\"\r\nREAPI_VERSION=\"${REAPI_VERSION:-latest}\"\r\nMETAMOD_VERSION=\"${METAMOD_VERSION:-latest}\"\r\nAMXMODX_VERSION=\"${AMXMODX_VERSION:-latest}\"\r\nREUNION_VERSION=\"${REUNION_VERSION:-latest}\"\r\nREVOICE_VERSION=\"${REVOICE_VERSION:-latest}\"\r\n\r\n# \u041f\u0440\u043e\u0432\u0435\u0440\u043a\u0430 \u0437\u0430\u0432\u0438\u0441\u0438\u043c\u043e\u0441\u0442\u0435\u0439\r\ncommand -v curl >\/dev\/null || { echo \"[-] curl not installed\"; exit 1; }\r\ncommand -v jq >\/dev\/null || { echo \"[-] jq not installed\"; exit 1; }\r\ncommand -v unzip >\/dev\/null || { echo \"[-] unzip not installed\"; exit 1; }\r\n\r\nif [[ -z \"${STEAM_USER}\" ]] || [[ -z \"${STEAM_PASS}\" ]]; then\r\n    echo -e \"Steam user is not set.\\nUsing anonymous user.\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"User set to ${STEAM_USER}\"\r\nfi\r\n\r\n# Download and install SteamCMD\r\ncd \/tmp\r\nmkdir -p \/mnt\/server\/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https:\/\/steamcdn-a.akamaihd.net\/client\/installer\/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C \/mnt\/server\/steamcmd\r\nmkdir -p \/mnt\/server\/steamapps\r\ncd \/mnt\/server\/steamcmd\r\n\r\nchown -R root:root \/mnt\r\nexport HOME=\/mnt\/server\r\nCSTRIKE_PATH=\"$HOME\/cstrike\"\r\n\r\n# Install game via SteamCMD\r\n.\/steamcmd.sh \\\r\n+force_install_dir \/mnt\/server \\\r\n+login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} \\\r\n+app_set_config 90 mod ${HLDS_GAME} \\\r\n$( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) \\\r\n+app_update ${SRCDS_APPID} \\\r\n$( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) \\\r\n$( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) \\\r\n${INSTALL_FLAGS} validate \\\r\n+quit\r\n\r\nmkdir -p \/mnt\/server\/.steam\/sdk32\r\ncp -v linux32\/steamclient.so ..\/.steam\/sdk32\/steamclient.so\r\nmkdir -p \/mnt\/server\/.steam\/sdk64\r\ncp -v linux64\/steamclient.so ..\/.steam\/sdk64\/steamclient.so\r\n\r\ncd \/mnt\/server\r\n\r\n# \u0423\u0441\u0442\u0430\u043d\u043e\u0432\u043a\u0430 HLDS\r\nsteamcmd\/steamcmd.sh \\\r\n  +force_install_dir \"$HOME\" \\\r\n  +login \"${STEAM_USER:-anonymous}\" \"${STEAM_PASS:-}\" \"${STEAM_AUTH:-}\" \\\r\n  +app_set_config 90 mod \"${HLDS_GAME:-cstrike}\" \\\r\n  +app_update \"${SRCDS_APPID:-90}\" validate \\\r\n  +quit\r\n\r\ninstall_from_github_release() {\r\n    local NAME=$1\r\n    local REPO=$2\r\n    local VERSION=$3\r\n    local ZIP_URL=\"\"\r\n    local TMP_DIR=\"${NAME}_install\"\r\n\r\n    [[ \"$VERSION\" == \"none\" ]] && { echo \"[+] Skipping... ($NAME)\"; return; }\r\n\r\n    echo \"[?] Installing... ($NAME - ${VERSION})\"\r\n\r\n    if [[ \"$VERSION\" == \"latest\" ]]; then\r\n        RELEASE_DATA=$(curl -s --fail \"https:\/\/api.github.com\/repos\/$REPO\/releases\/latest\") || { echo \"[-] Failed to fetch latest release for $NAME\"; return 1; }\r\n    else\r\n        RELEASE_DATA=$(curl -s --fail \"https:\/\/api.github.com\/repos\/$REPO\/releases\/tags\/$VERSION\") || { echo \"[-] Failed to fetch version $VERSION for $NAME\"; return 1; }\r\n    fi\r\n\r\n    ZIP_URL=$(echo \"$RELEASE_DATA\" | jq -r '.assets[] | select(.name | endswith(\".zip\")) | .browser_download_url')\r\n    [[ -z \"$ZIP_URL\" ]] && { echo \"[-] No .zip asset found for $NAME\"; return 1; }\r\n\r\n    echo \"[?] Downloading... ($ZIP_URL)\"\r\n    rm -rf \"$TMP_DIR\"\r\n    mkdir -p \"$TMP_DIR\"\r\n    curl -# --fail -L \"$ZIP_URL\" -o \"$TMP_DIR\/$NAME.zip\" || { echo \"[-] Failed to download $NAME\"; return 1; }\r\n\r\n    echo \"[?] Extracting... ($TMP_DIR\/$NAME.zip)\"\r\n    unzip -q \"$TMP_DIR\/$NAME.zip\" -d \"$TMP_DIR\" || { echo \"[-] Failed to extract $NAME\"; return 1; }\r\n\r\n    local ADDONS_PATH=$(find \"$TMP_DIR\" -type d -name addons | head -n 1)\r\n\r\n    case \"$NAME\" in\r\n        rehlds|regamedll)\r\n            cp -rv \"$TMP_DIR\"\/bin\/linux32\/* \"$HOME\"\r\n            ;;\r\n        reapi|amxmodx)\r\n            [[ -n \"$ADDONS_PATH\" ]] && cp -rv \"$ADDONS_PATH\" \"$CSTRIKE_PATH\" || return 1\r\n            ;;\r\n        metamod-r)\r\n            cp -r \"$TMP_DIR\"\/addons \"$CSTRIKE_PATH\"\r\n            mkdir -p \"$CSTRIKE_PATH\/addons\/metamod\"\r\n            touch \"$CSTRIKE_PATH\/addons\/metamod\/plugins.ini\"\r\n            grep -qxF \"linux addons\/amxmodx\/dlls\/amxmodx_mm_i386.so\" \"$CSTRIKE_PATH\/addons\/metamod\/plugins.ini\" || \\\r\n              echo \"linux addons\/amxmodx\/dlls\/amxmodx_mm_i386.so\" >> \"$CSTRIKE_PATH\/addons\/metamod\/plugins.ini\"\r\n\r\n            if grep -q \"^gamedll_linux\" \"$CSTRIKE_PATH\/liblist.gam\"; then\r\n                sed -i 's|^gamedll_linux.*|gamedll_linux \"addons\/metamod\/metamod_i386.so\"|' \"$CSTRIKE_PATH\/liblist.gam\"\r\n            else\r\n                echo 'gamedll_linux \"addons\/metamod\/metamod_i386.so\"' >> \"$CSTRIKE_PATH\/liblist.gam\"\r\n            fi\r\n            ;;\r\n        reunion)\r\n            mkdir -p \"$CSTRIKE_PATH\/addons\/reunion\/\"\r\n            cp -rv \"$TMP_DIR\"\/bin\/Linux\/* \"$CSTRIKE_PATH\/addons\/reunion\/\" 2>\/dev\/null || true\r\n            cp -v \"$TMP_DIR\"\/reunion.cfg \"$CSTRIKE_PATH\/reunion.cfg\" 2>\/dev\/null || true\r\n            mkdir -p \"$CSTRIKE_PATH\/addons\/metamod\/\"\r\n            touch \"$CSTRIKE_PATH\/addons\/metamod\/plugins.ini\"\r\n            grep -qxF \"linux addons\/reunion\/reunion_mm_i386.so\" \"$CSTRIKE_PATH\/addons\/metamod\/plugins.ini\" || \\\r\n              echo \"linux addons\/reunion\/reunion_mm_i386.so\" >> \"$CSTRIKE_PATH\/addons\/metamod\/plugins.ini\"\r\n            SALT=$(tr -dc 'A-Za-z0-9' < \/dev\/urandom | head -c 50)\r\n            sed -i \"s\/^SteamIdHashSalt\\s*=.*\/SteamIdHashSalt = $SALT\/\" \"$CSTRIKE_PATH\/reunion.cfg\"\r\n            ;;\r\n        revoice)\r\n            mkdir -p \"$CSTRIKE_PATH\/addons\/revoice\/\"\r\n            cp -rv \"$TMP_DIR\"\/bin\/linux32\/* \"$CSTRIKE_PATH\/addons\/revoice\/\" 2>\/dev\/null || true\r\n            cp -v \"$TMP_DIR\"\/revoice.cfg \"$CSTRIKE_PATH\/revoice.cfg\" 2>\/dev\/null || true\r\n            mkdir -p \"$CSTRIKE_PATH\/addons\/metamod\/\"\r\n            touch \"$CSTRIKE_PATH\/addons\/metamod\/plugins.ini\"\r\n            grep -qxF \"linux addons\/revoice\/revoice_mm_i386.so\" \"$CSTRIKE_PATH\/addons\/metamod\/plugins.ini\" || \\\r\n              echo \"linux addons\/revoice\/revoice_mm_i386.so\" >> \"$CSTRIKE_PATH\/addons\/metamod\/plugins.ini\"\r\n            ;;\r\n    esac\r\n\r\n    rm -rf \"$TMP_DIR\"\r\n    echo \"[+] Module $NAME installed successfully!\"\r\n}\r\n\r\ninstall_from_github_release \"rehlds\"        \"rehlds\/rehlds\"                     \"$REHLDS_VERSION\"\r\ninstall_from_github_release \"regamedll\"     \"rehlds\/ReGameDLL_CS\"               \"$REGAMEDLL_VERSION\"\r\ninstall_from_github_release \"reapi\"         \"rehlds\/reapi\"                      \"$REAPI_VERSION\"\r\ninstall_from_github_release \"metamod-r\"     \"rehlds\/metamod-r\"                  \"$METAMOD_VERSION\"\r\ninstall_from_github_release \"amxmodx\"       \"Pterodactyl-CS-1-6\/amxmodx\"        \"$AMXMODX_VERSION\"\r\ninstall_from_github_release \"reunion\"       \"rehlds\/reunion\"                    \"$REUNION_VERSION\"\r\ninstall_from_github_release \"revoice\"       \"rehlds\/revoice\"                    \"$REVOICE_VERSION\"\r\n\r\nmkdir -p \"$CSTRIKE_PATH\/addons\/amxmodx\/data\"\r\ntouch \"$CSTRIKE_PATH\/banned.cfg\"\r\ntouch \"$CSTRIKE_PATH\/listip.cfg\"\r\ntouch \"$CSTRIKE_PATH\/addons\/amxmodx\/data\/csstats.dat\"\r\n\r\nchmod -R 777 \"$HOME\"\r\n\r\necho \"[+] Installation completed successfully!\"",
+            "container": "ghcr.io\/ptero-eggs\/installers:debian",
+            "entrypoint": "bash"
+        }
+    },
+    "variables": [
+        {
+            "name": "Server Hostname",
+            "description": "\u0418\u043c\u044f \u0441\u0435\u0440\u0432\u0435\u0440\u0430, \u043e\u0442\u043e\u0431\u0440\u0430\u0436\u0430\u0435\u043c\u043e\u0435 \u0432 \u0441\u043f\u0438\u0441\u043a\u0435 \u0441\u0435\u0440\u0432\u0435\u0440\u043e\u0432.",
+            "env_variable": "HOSTNAME",
+            "default_value": "Counter-Strike 1.6 Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:128",
+            "field_type": "text"
+        },
+        {
+            "name": "Map",
+            "description": "\u041a\u0430\u0440\u0442\u0430, \u043a\u043e\u0442\u043e\u0440\u0430\u044f \u0431\u0443\u0434\u0435\u0442 \u0437\u0430\u0433\u0440\u0443\u0436\u0435\u043d\u0430 \u043f\u0440\u0438 \u0437\u0430\u043f\u0443\u0441\u043a\u0435 \u0441\u0435\u0440\u0432\u0435\u0440\u0430.",
+            "env_variable": "SRCDS_MAP",
+            "default_value": "de_dust2",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|alpha_dash",
+            "field_type": "text"
+        },
+        {
+            "name": "ReHLDS Version",
+            "description": "\u0412\u0435\u0440\u0441\u0438\u044f \u0434\u0432\u0438\u0436\u043a\u0430 ReHLDS. \u0423\u043a\u0430\u0436\u0438\u0442\u0435 latest \u0434\u043b\u044f \u0443\u0441\u0442\u0430\u043d\u043e\u0432\u043a\u0438 \u043f\u043e\u0441\u043b\u0435\u0434\u043d\u0435\u0439 \u0432\u0435\u0440\u0441\u0438\u0438.",
+            "env_variable": "REHLDS_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+        },
+        {
+            "name": "AmxModX Version",
+            "description": "\u0412\u0435\u0440\u0441\u0438\u044f AmxModX. \u041f\u043e\u0434\u0434\u0435\u0440\u0436\u0438\u0432\u0430\u044e\u0442\u0441\u044f: 1.8.2, 1.8.3, 1.9.0, 1.10.0, \u043b\u0438\u0431\u043e none \u0434\u043b\u044f \u043e\u0442\u043a\u043b\u044e\u0447\u0435\u043d\u0438\u044f.",
+            "env_variable": "AMXMODX_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:1.10.0,1.9.0,1.8.3,1.8.2,none|max:20",
+            "field_type": "text"
+        },
+        {
+            "name": "ReUnion",
+            "description": "\u0412\u0435\u0440\u0441\u0438\u044f ReUnion (\u044d\u043c\u0443\u043b\u044f\u0442\u043e\u0440 \u0430\u0443\u0442\u0435\u043d\u0442\u0438\u0444\u0438\u043a\u0430\u0446\u0438\u0438 Steam).",
+            "env_variable": "REUNION_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Metamod-R",
+            "description": "\u0412\u0435\u0440\u0441\u0438\u044f Metamod-R (\u0440\u0430\u0441\u0448\u0438\u0440\u044f\u0435\u043c\u0430\u044f \u0431\u0438\u0431\u043b\u0438\u043e\u0442\u0435\u043a\u0430 \u0434\u043b\u044f HLDS).",
+            "env_variable": "METAMOD_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+        },
+        {
+            "name": "ReAPI",
+            "description": "\u0412\u0435\u0440\u0441\u0438\u044f ReAPI (\u0440\u0430\u0441\u0448\u0438\u0440\u0435\u043d\u043d\u044b\u0439 API \u0434\u043b\u044f AmxModX \u0438 \u0434\u0432\u0438\u0436\u043a\u0430).",
+            "env_variable": "REAPI_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+        },
+        {
+            "name": "ReGameDLL_CS",
+            "description": "\u0412\u0435\u0440\u0441\u0438\u044f ReGameDLL (\u0437\u0430\u043c\u0435\u043d\u0430 \u043e\u0440\u0438\u0433\u0438\u043d\u0430\u043b\u044c\u043d\u043e\u0439 GameDLL CS).",
+            "env_variable": "REGAMEDDL_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+        },
+        {
+            "name": "ReVoice",
+            "description": "\u0412\u0435\u0440\u0441\u0438\u044f ReVoice (\u0433\u043e\u043b\u043e\u0441\u043e\u0432\u043e\u0439 \u043c\u043e\u0434\u0443\u043b\u044c \u0434\u043b\u044f HLDS).",
+            "env_variable": "REVOICE_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Auto update",
+            "description": "\u0410\u0432\u0442\u043e\u043c\u0430\u0442\u0438\u0447\u0435\u0441\u043a\u043e\u0435 \u043e\u0431\u043d\u043e\u0432\u043b\u0435\u043d\u0438\u0435 \u0441\u0435\u0440\u0432\u0435\u0440\u0430 \u043f\u0440\u0438 \u043f\u0435\u0440\u0435\u0437\u0430\u043f\u0443\u0441\u043a\u0435.",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "0",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|boolean",
+            "field_type": "text"
+        },
+        {
+            "name": "Game ID",
+            "description": "Steam App ID \u0438\u0433\u0440\u044b. \u0414\u043b\u044f HLDS \u0434\u043e\u043b\u0436\u0435\u043d \u0431\u044b\u0442\u044c \u0440\u0430\u0432\u0435\u043d 90.",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "90",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|numeric|in:90",
+            "field_type": "text"
+        },
+        {
+            "name": "Game Name",
+            "description": "\u041d\u0430\u0437\u0432\u0430\u043d\u0438\u0435 \u043c\u043e\u0434\u0438\u0444\u0438\u043a\u0430\u0446\u0438\u0438 (\u0438\u0433\u0440\u044b). \u0414\u043b\u044f CS 1.6 \u2014 cstrike.",
+            "env_variable": "HLDS_GAME",
+            "default_value": "cstrike",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|alpha_dash|between:1,100",
+            "field_type": "text"
+        },
+        {
+            "name": "Beta branch",
+            "description": "\u0412\u0435\u0442\u043a\u0430 Steam. \u0414\u043b\u044f \u0443\u0441\u0442\u0430\u043d\u043e\u0432\u043a\u0438 \u0441\u0442\u0430\u0440\u043e\u0439 \u0432\u0435\u0440\u0441\u0438\u0438 \u0443\u043a\u0430\u0436\u0438\u0442\u0435 steam_legacy, \u0438\u043d\u0430\u0447\u0435 \u043e\u0441\u0442\u0430\u0432\u044c\u0442\u0435 \u043f\u0443\u0441\u0442\u044b\u043c.",
+            "env_variable": "SRCDS_BETAID",
+            "default_value": "steam_legacy",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "nullable|string|in:,steam_legacy",
+            "field_type": "text"
+        },
+        {
+            "name": "VAC port",
+            "description": "\u041f\u043e\u0440\u0442 VAC (Valve Anti-Cheat). \u041e\u0431\u044b\u0447\u043d\u043e 26900.",
+            "env_variable": "VAC_PORT",
+            "default_value": "26900",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|numeric|digits_between:1,5",
+            "field_type": "text"
+        },
+        {
+            "name": "Validate",
+            "description": "\u041f\u0440\u043e\u0432\u0435\u0440\u043a\u0430 \u0446\u0435\u043b\u043e\u0441\u0442\u043d\u043e\u0441\u0442\u0438 \u0444\u0430\u0439\u043b\u043e\u0432 \u0438\u0433\u0440\u044b \u0447\u0435\u0440\u0435\u0437 SteamCMD. \u041d\u0435 \u0440\u0435\u043a\u043e\u043c\u0435\u043d\u0434\u0443\u0435\u0442\u0441\u044f \u0438\u0441\u043f\u043e\u043b\u044c\u0437\u043e\u0432\u0430\u0442\u044c \u0441 ReHLDS.",
+            "env_variable": "VALIDATE",
+            "default_value": "0",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|boolean",
+            "field_type": "text"
+        }
+    ]
+}
